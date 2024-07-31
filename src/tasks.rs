@@ -53,3 +53,69 @@ impl Task {
         Ok(timestamp)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::NaiveDate;
+
+    #[test]
+    fn test_task_creation_with_valid_date() {
+        let description = "Test task";
+        let deadline = "2024-12-31";
+        let task = Task::new(1, description, deadline);
+
+        assert_eq!(task.id, 1);
+        assert_eq!(task.description, description);
+        assert!(task.created <= Utc::now().timestamp());
+        assert!(task.deadline > task.created);
+        assert!(!task.completed);
+    }
+
+    #[test]
+    fn test_task_creation_with_past_date() {
+        let description = "Test task";
+        let past_date = "2000-01-01";
+        let task = Task::new(2, description, past_date);
+
+        assert_eq!(task.id, 2);
+        assert_eq!(task.description, description);
+        assert!(task.created <= Utc::now().timestamp());
+        assert!(task.deadline > task.created);
+        assert!(!task.completed);
+    }
+
+    #[test]
+    fn test_task_creation_with_invalid_date() {
+        let description = "Test task";
+        let invalid_date = "invalid-date";
+        let task = Task::new(3, description, invalid_date);
+
+        assert_eq!(task.id, 3);
+        assert_eq!(task.description, description);
+        assert!(task.created <= Utc::now().timestamp());
+        assert!(task.deadline > task.created);
+        assert!(!task.completed);
+    }
+
+    #[test]
+    fn test_parse_date_with_valid_date() {
+        let valid_date = "2024-12-31";
+        let parsed_date = Task::parse_date(valid_date).unwrap();
+        let expected_date = NaiveDate::from_ymd_opt(2024, 12, 31)
+            .and_then(|d| d.and_hms_opt(0, 0, 0))
+            .unwrap()
+            .and_utc()
+            .timestamp();
+        
+        assert_eq!(parsed_date, expected_date);
+    }
+
+    #[test]
+    fn test_parse_date_with_invalid_date() {
+        let invalid_date = "invalid-date";
+        let parsed_date = Task::parse_date(invalid_date);
+
+        assert!(parsed_date.is_err());
+    }
+}

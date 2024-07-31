@@ -1,6 +1,8 @@
 use chrono::{NaiveDate, Utc};
 use std::error::Error;
 
+print("hello, world!")
+
 pub struct Task {
     id: u64,
     description: String,
